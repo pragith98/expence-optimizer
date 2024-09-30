@@ -1,4 +1,5 @@
 import 'package:expense_optimizer/models/expense.dart';
+import 'package:expense_optimizer/widgets/add_new_expense.dart';
 import 'package:expense_optimizer/widgets/expense_list.dart';
 import 'package:flutter/material.dart';
 
@@ -43,7 +44,7 @@ class _ExpensesState extends State<Expenses> {
           Container(
             color: Colors.yellow,
             child: IconButton(
-              onPressed: () => {}, 
+              onPressed: openAddExpensesOverlay, 
               icon: const Icon(
                 Icons.add,
                 color: Colors.black,
@@ -57,6 +58,21 @@ class _ExpensesState extends State<Expenses> {
           ExpenseList(expenseList: _expenseList)
         ],
       ),
+    );
+  }
+
+  void onAddNewExpense(ExpenseModel expense) {
+    setState(() {
+      _expenseList.add(expense);
+    });
+  }
+
+  void openAddExpensesOverlay() {
+    showModalBottomSheet(
+      context: context, 
+      builder: (context) {
+        return AddNewExpense(onAddExpense: onAddNewExpense);
+      }
     );
   }
 }
