@@ -55,13 +55,39 @@ class _ExpensesState extends State<Expenses> {
       ),
       body: Column(
         children: [
-          ExpenseList(expenseList: _expenseList)
+          ExpenseList(
+            expenseList: _expenseList,
+            onDeleteExpense: onDeleteExpense,
+          )
         ],
       ),
     );
   }
 
-  void onAddNewExpense(ExpenseModel expense) {
+  void onDeleteExpense(ExpenseModel expense) {
+    ExpenseModel toDelete = expense;
+    final int indexToDelete = _expenseList.indexOf(toDelete);
+
+    setState(() {
+      _expenseList.remove(expense);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Deleted!'),
+        action: SnackBarAction(
+          label: 'Undo', 
+          onPressed: () {
+            setState(() {
+              _expenseList.insert(indexToDelete, toDelete);
+            });
+          }
+        ),
+      )
+    );
+  }
+
+  void onAddExpense(ExpenseModel expense) {
     setState(() {
       _expenseList.add(expense);
     });
@@ -71,7 +97,7 @@ class _ExpensesState extends State<Expenses> {
     showModalBottomSheet(
       context: context, 
       builder: (context) {
-        return AddNewExpense(onAddExpense: onAddNewExpense);
+        return AddNewExpense(onAddExpense: onAddExpense);
       }
     );
   }

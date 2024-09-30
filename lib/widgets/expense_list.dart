@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 
 class ExpenseList extends StatelessWidget {
   final List<ExpenseModel> expenseList;
+  final void Function(ExpenseModel expense) onDeleteExpense;
 
   const ExpenseList({
     super.key,
-    required this.expenseList
+    required this.expenseList,
+    required this.onDeleteExpense
   });
 
   @override
@@ -18,7 +20,16 @@ class ExpenseList extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
-            child: ExpenseTile(expense: expenseList[index]),
+            child: Dismissible(
+              key: Key(expenseList[index].id),
+              direction: DismissDirection.startToEnd,
+              onDismissed: (direction) => {
+                onDeleteExpense(expenseList[index])
+              },
+              child: ExpenseTile(
+                expense: expenseList[index]
+              )
+            ),
           );
         },
       ),
