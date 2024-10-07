@@ -22,7 +22,7 @@ class _ExpensesState extends State<Expenses> {
     
     final expenseData = _myBox.get('EXPENSE_DATA');
     
-    if(expenseData.length < 1) {
+    if(expenseData == null || expenseData.length < 1) {
       db.createInitDatabase();
     } else {
       db.loadData();
