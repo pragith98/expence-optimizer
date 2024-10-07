@@ -1,7 +1,9 @@
 import 'package:expense_optimizer/models/expense.dart';
+import 'package:expense_optimizer/server/database.dart';
 import 'package:expense_optimizer/widgets/add_new_expense.dart';
 import 'package:expense_optimizer/widgets/expense_list.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class Expenses extends StatefulWidget {
   const Expenses({super.key});
@@ -11,25 +13,21 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
-  // Expense list
-  final List<ExpenseModel> _expenseList = [
-    ExpenseModel(title: 'title 1', 
-                 amount: 100, 
-                 date: DateTime.now(), 
-                 category: Category.food),
-    ExpenseModel(title: 'title 2', 
-                 amount: 300, 
-                 date: DateTime.now(), 
-                 category: Category.leasure),
-    ExpenseModel(title: 'title 3', 
-                 amount: 400, 
-                 date: DateTime.now(), 
-                 category: Category.work),
-    ExpenseModel(title: 'title 4', 
-                 amount: 800, 
-                 date: DateTime.now(), 
-                 category: Category.food)
-  ];
+  final _myBox = Hive.box('expensesDb');
+  Database db = Database();
+
+  @override
+  void initState() {
+    super.initState();
+    
+    final expenseData = _myBox.get('EXPENSE_DATA');
+    
+    if(expenseData.length < 1) {
+      db.createInitDatabase();
+    } else {
+      db.loadData();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +54,7 @@ class _ExpensesState extends State<Expenses> {
       body: Column(
         children: [
           ExpenseList(
-            expenseList: _expenseList,
+            expenseList: db.expenseList,
             onDeleteExpense: onDeleteExpense,
           )
         ],
@@ -66,10 +64,11 @@ class _ExpensesState extends State<Expenses> {
 
   void onDeleteExpense(ExpenseModel expense) {
     ExpenseModel toDelete = expense;
-    final int indexToDelete = _expenseList.indexOf(toDelete);
+    final int indexToDelete = db.expenseList.indexOf(toDelete);
 
     setState(() {
-      _expenseList.remove(expense);
+      db.expenseList.remove(expense);
+      db.updateData();
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +78,8 @@ class _ExpensesState extends State<Expenses> {
           label: 'Undo', 
           onPressed: () {
             setState(() {
-              _expenseList.insert(indexToDelete, toDelete);
+              db.expenseList.insert(indexToDelete, toDelete);
+              db.updateData();
             });
           }
         ),
@@ -89,7 +89,8 @@ class _ExpensesState extends State<Expenses> {
 
   void onAddExpense(ExpenseModel expense) {
     setState(() {
-      _expenseList.add(expense);
+      db.expenseList.add(expense);
+      db.updateData();
     });
   }
 
